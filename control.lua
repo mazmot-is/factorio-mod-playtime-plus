@@ -1,10 +1,10 @@
-script.on_init(function()
-    global.ptp = {}
-end)
+local ptp = {}
 
-
-local function update_timer()
-  local label = global.ptp.frame.ptp_label
+function update_timer()
+  if not ptp.frame then
+    create_gui()
+  end
+  local label = ptp.frame.ptp_label
   
   local basesec = math.floor(game.tick/60)
   local seconds = math.floor(basesec) % 60
@@ -17,57 +17,55 @@ local function update_timer()
   end
 end
 
-local function create_gui(event)
-  if not game.players[event.player_index] then return end -- satd. prevent error on tutorial
+function create_gui()
+  -- if not game.players[1] then return end -- satd. prevent error on tutorial\
 
-  local player = game.players[event.player_index]
-  local screen = player.gui.screen
+  local player = game.players[1]
 
-  global.ptp.frame = screen.add{type="frame", name="ptp_frame"}
-  global.ptp.frame.style.padding = {0, 6, 0, 6}
-  global.ptp.frame.location = {540, 0}
+  if player.gui.screen.ptp_frame then
+    ptp.frame = player.gui.screen.ptp_frame
+    return
+  end
 
-  local label = global.ptp.frame.add{type="label", name="ptp_label"}
-  label.drag_target = global.ptp.frame
+  local frame = player.gui.screen.add{type="frame", name="ptp_frame"}
+  ptp.frame = frame
+  frame.style.padding = {0, 6, 0, 6}
+  reset_gui_location()
+
+  local label = frame.add{type="label", name="ptp_label"}
+  label.drag_target = frame
 
   save_gui_location()
   save_gui_location()
   update_timer()
 end
 
-local function create_gui2()
-  local e = {}
-  e.player_index = 1
-  create_gui(e)
-end
-
-local function reset_gui_location()
-  global.ptp.frame.location = {540, 0}
+function reset_gui_location()
+  ptp.frame.location = {settings.global["ptp-x"].value, settings.global["ptp-y"].value}
 end
 
 function save_gui_location()
   -- buffering gui location to look one previous location due to
   -- on_gui_location_changed is triggerd AFTER on_player_display_resolution_change
-  global.ptp.x1 = global.ptp.x2
-  global.ptp.y1 = global.ptp.y2
-  global.ptp.x2 = global.ptp.frame.location.x
-  global.ptp.y2 = global.ptp.frame.location.y
-  game.print(string.format("a %d:%d ", global.ptp.x2, global.ptp.y2))
+  ptp.x1 = ptp.x2
+  ptp.y1 = ptp.y2
+  ptp.x2 = ptp.frame.location.x
+  ptp.y2 = ptp.frame.location.y
+  -- log(string.format("a %d:%d ", ptp.x2, ptp.y2))
 end
 
 local function reposition_gui(event)
-  if not global.ptp.x1 then return end
+  if not ptp.x1 then return end
 
   local player = game.players[event.player_index]
   local currw = player.display_resolution.width
   local currh = player.display_resolution.height
   local prevw = event.old_resolution.width
   local prevh = event.old_resolution.height
-  local newx = math.floor(global.ptp.x1 / prevw * currw)
-  local newy = math.floor(global.ptp.y1 / prevh * currh)
-  global.ptp.frame.location = {newx, newy}
+  local newx = math.floor(ptp.x1 / prevw * currw)
+  local newy = math.floor(ptp.y1 / prevh * currh)
+  ptp.frame.location = {newx, newy}
 
-  -- update location
   save_gui_location()
   save_gui_location() -- call twice to override buffering
 end
@@ -75,8 +73,8 @@ end
 
 --script.on_event(defines.events.on_player_created, save_gui_location)
 --script.on_event(defines.events.on_player_created, save_gui_location) -- call twice to override buffering
-script.on_event(defines.events.on_player_created, create_gui)
-script.on_configuration_changed(create_gui2) -- a case where the mod has been applied for existing save
+--script.on_event(defines.events.on_player_created, create_gui)
+--script.on_configuration_changed(create_gui2) -- a case where the mod has been applied for existing save
 
 script.on_nth_tick(60, update_timer)
 
