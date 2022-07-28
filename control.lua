@@ -1,33 +1,29 @@
-if not playtime then playtime = {} end
+function update_timer()
+  -- nothing to do if no player
+  if not game then return end
+  if not game.players[1] then return end
 
-playtime.play_time_seconds = 0
-
--- script.on_event(defines.events.on_tick, function(event)
-script.on_nth_tick(60, function(event)
-  if playtime.play_time_seconds == 0 then
-    playtime.play_time_seconds = math.floor(game.tick/60)
+  -- generate gui if the first loop
+  if not playtime_label then
+    local frame = game.players[1].gui.screen.add{type="frame"}
+    frame.style.padding = {0, 8, 0, 8}
+    frame.location = {540, 0}
+    playtime_label = frame.add{type="label"}
+    playtime_label.drag_target = frame
   end
-  
-  local play_time_seconds = math.floor(playtime.play_time_seconds) % 60
-  local play_time_minutes = math.floor(playtime.play_time_seconds/60) % 60
-  local play_time_hours = math.floor(playtime.play_time_seconds/3600)
---local play_time_hours = math.floor(playtime.play_time_seconds/3600) % 24
---local play_time_days = math.floor(playtime.play_time_seconds/(24*3600))
 
---/c local x = game.player.gui.screen.add{type="frame", style_mods={margin=0}} x.location={540,0} x.caption=string.format("Total time: %d:%02d:%02d", 0,30,30)
-
-  for i, player in pairs(game.connected_players) do
-    if player.gui.screen.clockGUI == nil then
-      player.gui.screen.add{type = "button", name = "clockGUI"}
-      player.gui.screen.clockGUI.location = {540, 0}
-    end
-    if play_time_hours > 0 then
-      player.gui.screen.clockGUI.caption = string.format("in-game: %d:%02d:%02d", play_time_hours, play_time_minutes, play_time_seconds)
-    else
-      player.gui.screen.clockGUI.caption = string.format("in-game: %02d:%02d", play_time_minutes, play_time_seconds)
-    end
+  -- update timer
+  local sec = math.floor(game.tick/60)
+  local seconds = math.floor(sec) % 60
+  local minutes = math.floor(sec/60) % 60
+  local hours = math.floor(sec/3600)
+  if hours > 0 then
+    playtime_label.caption = string.format("%d:%02d:%02d", hours, minutes, seconds)
+  else
+    playtime_label.caption = string.format("%02d:%02d", minutes, seconds)
   end
-  
-  playtime.play_time_seconds = playtime.play_time_seconds + 1
-end)
+end
 
+script.on_init(update_timer)
+script.on_load(update_timer)
+script.on_nth_tick(60, update_timer)
