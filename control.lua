@@ -1,7 +1,7 @@
-local ptp = {}
+local ptplus = {}
 
 local function update_timer()
-  local label = ptp.frame.ptp_label
+  local label = ptplus.frame.ptplus_label
   
   local base = math.floor(game.tick/60)
   local seconds = math.floor(base) % 60
@@ -16,19 +16,19 @@ end
 
 function create_gui()
   if not game.players[1] then return end -- satd. prevent error on tutorial
-  if game.players[1].gui.screen.ptp_frame then
-     ptp.frame = game.players[1].gui.screen.ptp_frame
+  if game.players[1].gui.screen.ptplus_frame then
+     ptplus.frame = game.players[1].gui.screen.ptplus_frame
      return
   end
 
   local player = game.players[1]
 
-  local frame = player.gui.screen.add{type="frame", name="ptp_frame"}
-  ptp.frame = frame
+  local frame = player.gui.screen.add{type="frame", name="ptplus_frame"}
+  ptplus.frame = frame
   frame.style.padding = {0, 6, 0, 6}
   reset_gui_location()
 
-  local label = frame.add{type="label", name="ptp_label"}
+  local label = frame.add{type="label", name="ptplus_label"}
   label.drag_target = frame
 
   save_gui_location()
@@ -43,30 +43,30 @@ local function create_gui_wo_index()
 end
 
 function reset_gui_location()
-  ptp.frame.location = {settings.global["ptp-x"].value, settings.global["ptp-y"].value}
+  ptplus.frame.location = {settings.global["ptplus-x"].value, settings.global["ptplus-y"].value}
 end
 
 function save_gui_location()
   -- buffering gui location to look one previous location due to
   -- on_gui_location_changed is triggerd AFTER on_player_display_resolution_change
-  ptp.x1 = ptp.x2
-  ptp.y1 = ptp.y2
-  ptp.x2 = ptp.frame.location.x
-  ptp.y2 = ptp.frame.location.y
-  -- log(string.format("a %d:%d ", ptp.x2, ptp.y2))
+  ptplus.x1 = ptplus.x2
+  ptplus.y1 = ptplus.y2
+  ptplus.x2 = ptplus.frame.location.x
+  ptplus.y2 = ptplus.frame.location.y
+  -- log(string.format("a %d:%d ", ptplus.x2, ptplus.y2))
 end
 
 local function reposition_gui(event)
-  if not ptp.x1 then return end
+  if not ptplus.x1 then return end
 
   local player = game.players[event.player_index]
   local currw = player.display_resolution.width
   local currh = player.display_resolution.height
   local prevw = event.old_resolution.width
   local prevh = event.old_resolution.height
-  local newx = math.floor(ptp.x1 / prevw * currw)
-  local newy = math.floor(ptp.y1 / prevh * currh)
-  ptp.frame.location = {newx, newy}
+  local newx = math.floor(ptplus.x1 / prevw * currw)
+  local newy = math.floor(ptplus.y1 / prevh * currh)
+  ptplus.frame.location = {newx, newy}
 
   save_gui_location()
   save_gui_location() -- call twice to override buffering
@@ -89,7 +89,7 @@ end)
 script.on_nth_tick(60, update_timer)
 
 script.on_event(defines.events.on_gui_click, function(event)
-  if event.element.name == "ptp_label" and event.button == defines.mouse_button_type.right then
+  if event.element.name == "ptplus_label" and event.button == defines.mouse_button_type.right then
     reset_gui_location()
     save_gui_location()
     save_gui_location() -- call twice to override buffering
@@ -97,7 +97,7 @@ script.on_event(defines.events.on_gui_click, function(event)
 end)
 
 script.on_event(defines.events.on_gui_location_changed, function(event)
-  if event.element.name == "ptp_frame" then
+  if event.element.name == "ptplus_frame" then
     save_gui_location()
   end
 end)
