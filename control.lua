@@ -14,7 +14,6 @@ local function update_timer()
 end
 
 local function create_gui(player)
-  game.print("create")
   local frame = player.gui.screen.add{type="frame", name="ptplus-frame"}
   frame.style.padding = {0, 6, 0, 6}
   local label = frame.add{type="label", name="ptplus-label"}
