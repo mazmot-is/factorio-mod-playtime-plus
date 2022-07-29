@@ -14,11 +14,13 @@ local function update_timer()
 end
 
 local function create_gui(player)
+  game.print("create")
   local frame = player.gui.screen.add{type="frame", name="ptplus-frame"}
-  ptplus.frame = frame
   frame.style.padding = {0, 6, 0, 6}
   local label = frame.add{type="label", name="ptplus-label"}
   label.drag_target = frame
+
+  ptplus.frame = frame
 end
 
 local function init_gui()
@@ -42,7 +44,7 @@ function save_gui_location()
 end
 
 local function reposition_gui(event)
-  if not ptplus.x1 then return end -- can nothing to do
+  if not ptplus.x1 then return end -- nothing to do if no buffer
 
   local player = game.players[event.player_index]
   local currw = player.display_resolution.width
@@ -57,6 +59,16 @@ local function reposition_gui(event)
   save_gui_location() -- call twice to override buffering
 end
 
+local function snap_gui(player)
+  local margin = 15 -- snap sensitivity
+  local x = ptplus.frame.location.x
+  local y = ptplus.frame.location.y
+  if x < margin then x = 0 end
+  if y < margin then y = 0 end
+  --if x > player.display_resolution.width - margin then x = player.display_resolution.width end
+  --if y > player.display_resolution.width - margin then y = player.display_resolution.height end
+  ptplus.frame.location = {x, y}
+end
 --------------------------------------------------------------------------------
 -- event handlers
 
@@ -68,11 +80,12 @@ end
 local function on_nth_tick_1() -- an altenative to on_init() and on_load() to access game.players[1]
   script.on_nth_tick(1, nil) -- remove myself immediately to run at once
 
-  -- if gui not eixsts (e.g., load saved data that did not use ptplus)
-  if not game.players[1].gui.screen["ptplus-frame"] then
-     create_gui(game.players[1])
+  local player = game.players[1]
+  -- if gui not eixsts (e.g., load saved data that does not use ptplus)
+  if not player.gui.screen["ptplus-frame"] then
+    create_gui(player)
   end
-  ptplus.frame = game.players[1].gui.screen["ptplus-frame"]
+  ptplus.frame = player.gui.screen["ptplus-frame"]
   init_gui()
 end
 
@@ -88,6 +101,7 @@ end
 
 local function on_gui_location_changed(event)
   if event.element.name == "ptplus-frame" then
+    snap_gui(game.players[event.player_index])
     save_gui_location()
   end
 end
