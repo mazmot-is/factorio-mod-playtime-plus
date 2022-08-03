@@ -5,12 +5,13 @@ function update_timer(player)
   local seconds = math.floor(base) % 60
   local minutes = math.floor(base/60) % 60
   local hours = math.floor(base/3600)
-  local label = player.gui.screen[GUI_FRAME_NAME][GUI_LABEL_NAME]
+
+  local caption = string.format("%02d:%02d", minutes, seconds)
   if hours > 0 then
-    label.caption = string.format("%d:%02d:%02d", hours, minutes, seconds)
-  else
-    label.caption = string.format("%02d:%02d", minutes, seconds)
+    caption = string.format("%d:%s", hours, caption)
   end
+  local label = player.gui.screen[GUI_FRAME_NAME][GUI_LABEL_NAME]
+  label.caption = caption
 end
 
 function create_gui(player)
