@@ -4,7 +4,6 @@ Adds a simple clock showing how long the current game has been running.
 Compare to the original [playtime](https://mods.factorio.com/mod/playtime):
 - Better performance (update only once per 60 ticks)
 - Custom positioning by mod setting page or mouse dragging
-- Custom sizing by mod setting page
 - Right click to reset position
 - Dark theme
 
