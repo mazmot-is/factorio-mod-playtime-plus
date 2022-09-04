@@ -25,6 +25,7 @@ function init_gui(player)
   global.ptplus[player.name] = {}
   create_gui(player)
   reset_gui_location(player)
+  reset_gui_location(player) -- Call twice to override location buffering
   update_timer(player)
 end
 
@@ -42,12 +43,13 @@ end
 
 function save_gui_location(player)
   local frame = player.gui.screen[GUI_FRAME_NAME]
-  -- Buffering gui location to look one previous location due to on_gui_location_changed() is triggerd AFTER on_player_display_resolution_change()
+  -- Buffering gui location to look one previous location due to on_gui_location_changed() is triggerd BEFORE on_player_display_resolution_change()
   global.ptplus[player.name].loc1 = global.ptplus[player.name].loc2
   global.ptplus[player.name].loc2 = {x = frame.location.x, y = frame.location.y}
 end
 
 function reposition_gui(event, player)
+  if not (global.ptplus[player.name].loc1) then return end -- Workaround to prevent crash
   local currw = player.display_resolution.width
   local currh = player.display_resolution.height
   local prevw = event.old_resolution.width
@@ -55,6 +57,7 @@ function reposition_gui(event, player)
   local x = math.floor(global.ptplus[player.name].loc1.x / prevw * currw)
   local y = math.floor(global.ptplus[player.name].loc1.y / prevh * currh)
   set_gui_location(player, x, y)
+  set_gui_location(player, x, y) -- Call twice to override location buffering
 end
 
 function snap_gui(player)
@@ -74,7 +77,6 @@ function set_gui_location(player, x, y)
   local frame = player.gui.screen[GUI_FRAME_NAME]
   frame.location = {x, y}
   save_gui_location(player)
-  save_gui_location(player) -- call twice to override buffering
 end
 
 --------------------------------------------------------------------------------
