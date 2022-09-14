@@ -25,7 +25,6 @@ function init_gui(player)
   global.ptplus[player.name] = {}
   create_gui(player)
   reset_gui_location(player)
-  reset_gui_location(player) -- Call twice to override location buffering
   update_timer(player)
 end
 
@@ -39,6 +38,7 @@ function reset_gui_location(player)
   local x = settings.get_player_settings(player)["ptplus-x"].value
   local y = settings.get_player_settings(player)["ptplus-y"].value
   set_gui_location(player, x, y)
+  set_gui_location(player, x, y) -- Call twice to override location buffering
 end
 
 function save_gui_location(player)
@@ -111,13 +111,16 @@ end
 local function on_gui_location_changed(event)
   if event.element.name == GUI_FRAME_NAME then
     local player = game.players[event.player_index]
-    snap_gui(player)
+    -- temporarily disable snap feature to prevent event order bug
+    --snap_gui(player)
+    save_gui_location(player)
   end
 end
 
 local function on_player_display_resolution_changed(event)
   local player = game.players[event.player_index]
   reposition_gui(event, player)
+  snap_gui(player) -- to prevent out of window
 end
 
 local function on_runtime_mod_setting_changed(event)
