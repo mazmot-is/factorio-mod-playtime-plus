@@ -54,8 +54,12 @@ function reposition_gui(event, player)
   local currh = player.display_resolution.height
   local prevw = event.old_resolution.width
   local prevh = event.old_resolution.height
+
+  local scale = player.display_scale
+  local w = calc_width(player) * scale
   local x = math.floor(global.ptplus[player.name].loc1.x / prevw * currw)
   local y = math.floor(global.ptplus[player.name].loc1.y / prevh * currh)
+
   set_gui_location(player, x, y)
   set_gui_location(player, x, y) -- Call twice to override location buffering
 end
@@ -63,14 +67,30 @@ end
 function snap_gui(player)
   local frame = player.gui.screen[GUI_FRAME_NAME]
   local margin = GUI_SNAP_MARGIN -- snap sensitivity
+
   local x = frame.location.x
   local y = frame.location.y
   if x < margin then x = 0 end
   if y < margin then y = 0 end
-  -- [TODO] how to snap to right and bottom w/o accessing gui's width and height?
-  --if x > player.display_resolution.width - margin - ?? then x = player.display_resolution.width end
-  --if y > player.display_resolution.width - margin - ?? then y = player.display_resolution.height end
+
+  local scale = player.display_scale
+  local w = calc_width(player) * scale
+  local h = 28 * scale
+  if x > player.display_resolution.width - margin - w then x = player.display_resolution.width - w end
+  if y > player.display_resolution.height - margin - h then y = player.display_resolution.height - h end
+
   set_gui_location(player, x, y)
+end
+
+function calc_width(player)
+  local label = player.gui.screen[GUI_FRAME_NAME][GUI_LABEL_NAME]
+  local caption = label.caption
+  local WIDTH_CHAR = 8
+  local WIDTH_COLON = 2
+  local WIDTH_MARGIN = 9
+  local n_char = #string.gsub(caption, ":", "")
+  local n_colon = #caption - n_char
+  return n_char * WIDTH_CHAR + n_colon * WIDTH_COLON + 2 * WIDTH_MARGIN
 end
 
 function set_gui_location(player, x, y)
@@ -87,9 +107,14 @@ local function on_nth_tick_60()
   end
 end
 
+local function on_nth_tick_hour()
+  for _, player in pairs(game.players) do
+    snap_gui(player) -- preventing out of edge per hour
+  end
+end
+
 local function on_configuration_changed(event)
   for _, player in pairs(game.players) do
-    -- re-create global vars and frame
     global.ptplus = {}
     destroy_gui(player)
     init_gui(player)
@@ -111,16 +136,13 @@ end
 local function on_gui_location_changed(event)
   if event.element.name == GUI_FRAME_NAME then
     local player = game.players[event.player_index]
-    -- temporarily disable snap feature to prevent event order bug
-    --snap_gui(player)
-    save_gui_location(player)
+    snap_gui(player)
   end
 end
 
 local function on_player_display_resolution_changed(event)
   local player = game.players[event.player_index]
   reposition_gui(event, player)
-  snap_gui(player) -- to prevent out of window
 end
 
 local function on_runtime_mod_setting_changed(event)
@@ -135,6 +157,7 @@ script.on_init(function()
 end)
 
 script.on_nth_tick(60, on_nth_tick_60)
+script.on_nth_tick(60*60*60, on_nth_tick_hour)
 script.on_configuration_changed(on_configuration_changed)
 script.on_event(defines.events.on_player_created, on_player_created)
 script.on_event(defines.events.on_gui_click, on_gui_click)
