@@ -50,6 +50,7 @@ end
 
 function reposition_gui(event, player)
   if not (global.ptplus[player.name].loc1) then return end -- Workaround to prevent crash
+
   local currw = player.display_resolution.width
   local currh = player.display_resolution.height
   local prevw = event.old_resolution.width
@@ -103,13 +104,17 @@ end
 -- event handlers
 local function on_nth_tick_60()
   for _, player in pairs(game.players) do
-    update_timer(player)
+    if global.ptplus[player.name] ~= nil then -- Workaround to prevent crash #https://mods.factorio.com/mod/playtime-plus/discussion/64186da0b66cf569cb6e8518
+      update_timer(player)
+    end
   end
 end
 
 local function on_nth_tick_hour()
   for _, player in pairs(game.players) do
-    snap_gui(player) -- preventing out of edge per hour
+    if global.ptplus[player.name] ~= nil then -- Workaround to prevent crash #https://mods.factorio.com/mod/playtime-plus/discussion/64186da0b66cf569cb6e8518
+      snap_gui(player) -- preventing out of edge per hour
+    end
   end
 end
 
