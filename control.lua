@@ -119,8 +119,8 @@ local function on_nth_tick_hour()
 end
 
 local function on_configuration_changed(event)
+  global.ptplus = {}
   for _, player in pairs(game.players) do
-    global.ptplus = {}
     destroy_gui(player)
     init_gui(player)
   end
