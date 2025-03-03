@@ -1,11 +1,11 @@
 {
-  "name": "playtime-plus",
-  "version": "1.0.5",
-  "factorio_version": "1.1",
-  "title": "Playtime+",
-  "author": "Mazmot",
-  "contact": "Private",
-  "homepage": "",
-  "description": "Adds a simple clock showing how long the current game has been running.",
-  "dependencies": ["base >= 1.1"]
+    "name": "playtime-plus",
+    "version": "1.0.6",
+    "title": "Playtime+",
+    "author": "Mazmot",
+    "contact": "Private",
+    "homepage": "",
+    "description": "Adds a simple clock showing how long the current game has been running.",
+    "dependencies": ["base >= 2.0.0"],
+    "factorio_version": "2.0"
 }

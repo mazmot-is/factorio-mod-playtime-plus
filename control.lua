@@ -22,7 +22,7 @@ function create_gui(player)
 end
 
 function init_gui(player)
-  global.ptplus[player.name] = {}
+  storage.ptplus[player.name] = {}
   create_gui(player)
   reset_gui_location(player)
   update_timer(player)
@@ -44,12 +44,12 @@ end
 function save_gui_location(player)
   local frame = player.gui.screen[GUI_FRAME_NAME]
   -- Buffering gui location to look one previous location due to on_gui_location_changed() is triggerd BEFORE on_player_display_resolution_change()
-  global.ptplus[player.name].loc1 = global.ptplus[player.name].loc2
-  global.ptplus[player.name].loc2 = {x = frame.location.x, y = frame.location.y}
+  storage.ptplus[player.name].loc1 = storage.ptplus[player.name].loc2
+  storage.ptplus[player.name].loc2 = {x = frame.location.x, y = frame.location.y}
 end
 
 function reposition_gui(event, player)
-  if not (global.ptplus[player.name].loc1) then return end -- Workaround to prevent crash
+  if not (storage.ptplus[player.name].loc1) then return end -- Workaround to prevent crash
 
   local currw = player.display_resolution.width
   local currh = player.display_resolution.height
@@ -58,8 +58,8 @@ function reposition_gui(event, player)
 
   local scale = player.display_scale
   local w = calc_width(player) * scale
-  local x = math.floor(global.ptplus[player.name].loc1.x / prevw * currw)
-  local y = math.floor(global.ptplus[player.name].loc1.y / prevh * currh)
+  local x = math.floor(storage.ptplus[player.name].loc1.x / prevw * currw)
+  local y = math.floor(storage.ptplus[player.name].loc1.y / prevh * currh)
 
   set_gui_location(player, x, y)
   set_gui_location(player, x, y) -- Call twice to override location buffering
@@ -104,7 +104,7 @@ end
 -- event handlers
 local function on_nth_tick_60()
   for _, player in pairs(game.players) do
-    if global.ptplus[player.name] ~= nil then -- Workaround to prevent crash #https://mods.factorio.com/mod/playtime-plus/discussion/64186da0b66cf569cb6e8518
+    if storage.ptplus[player.name] ~= nil then -- Workaround to prevent crash #https://mods.factorio.com/mod/playtime-plus/discussion/64186da0b66cf569cb6e8518
       update_timer(player)
     end
   end
@@ -112,14 +112,14 @@ end
 
 local function on_nth_tick_hour()
   for _, player in pairs(game.players) do
-    if global.ptplus[player.name] ~= nil then -- Workaround to prevent crash #https://mods.factorio.com/mod/playtime-plus/discussion/64186da0b66cf569cb6e8518
+    if storage.ptplus[player.name] ~= nil then -- Workaround to prevent crash #https://mods.factorio.com/mod/playtime-plus/discussion/64186da0b66cf569cb6e8518
       snap_gui(player) -- preventing out of edge per hour
     end
   end
 end
 
 local function on_configuration_changed(event)
-  global.ptplus = {}
+  storage.ptplus = {}
   for _, player in pairs(game.players) do
     destroy_gui(player)
     init_gui(player)
@@ -158,7 +158,7 @@ local function on_runtime_mod_setting_changed(event)
 end
 
 script.on_init(function()
-  global.ptplus = {}
+  storage.ptplus = {}
 end)
 
 script.on_nth_tick(60, on_nth_tick_60)
